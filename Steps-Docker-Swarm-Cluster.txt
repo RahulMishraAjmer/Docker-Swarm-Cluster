@@ -1,0 +1,47 @@
+************************************************************************************
+************************************************************************************
+                          Set up Docker Swarm Cluser on AWS 
+************************************************************************************
+************************************************************************************
+
+Please note that there is NO support for Docker Community Edition in Radhat Linux that is why we are 
+using the Ubuntu, However, You can also use centos based on your requirements.
+
+Prerequisites
+======================
+1. Set up 3 Ubuntu Machines
+   Master -1
+   Workers-2
+2. Make sure to open following ports in AWS Security Groups as there are very much requied to set up Docker Swarm Cluster
+   a. TCP Port 2377: For Cluster Management communications
+   b. TCP and UDP port 7946: For communication among nodes
+   c. UDP port 4789: For overlay network traffic
+   d. ESP port 50: For encrypted overlay network (If you want encrypted overlay communication then only it is required or lese it is optional)
+   e. TCP port 80: We will access the deployed application (http) on the cluster through browser
+   
+   
+Steps
+==========================
+
+1. Inastall Docker community edition in all 3 servers
+	a. sudo curl -fsSL get.docker.com | /bin/bash
+2. Add user (ubuntu) to docker group
+   sudo usermod -aG docker ${USER}
+3. Exit and log back in so that changes can be reflected in the ubuntu user
+4. Execute the below commands to initiate docker swarm manager in one of the machine (On the machine that you identify as Cluster Manager)
+	# Initialize docker swarm cluster
+	docker swarm init  
+	# Get worker token
+	docker swarm join-token worker
+	# You can use the below command to add another machine as the docker swarm manager
+	docker swarm join-token manager
+	# Add worked machines to cluster
+	run the command received by running the 'docker swarm join-token worker' on the worker machines
+	# check the list of docker nodes, by running  the below command on manager machine
+	docker node ls
+5. Deploy sample docker application in the docker swarm cluster
+	docker service create --name webserver --replicas=2 -p 80:80 httpd
+6. get the public IP of any of the machine (either manager or worker) of the cluster and access it by opening it on the browser as http://<public_ip>:80
+
+
+	
